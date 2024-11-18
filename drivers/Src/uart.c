@@ -5,12 +5,18 @@
  *      Author: klabu
  */
 
+#include <stdio.h>
 #include "uart.h"
 
 #define SYS_CLOCK 16000000
 #define APB1_CLOCK SYS_CLOCK
 #define UART_BAUDRATE 115200
 
+static int __io_putchar(int character);
+static void uart_write(int character);
+
+
+// Function to initialize UART2 TX
 void uart_tx_init(void){
     // Enable clock for GPIOA by setting the AHB1ENR register bit for GPIOA (bit 0)
     RCC->AHB1ENR |= (1U << 0);
@@ -41,4 +47,26 @@ void uart_tx_init(void){
     // Enable UART module by setting the USART_CR2 USART enable (UE) register bit to 1 (bit 13)
     USART2->CR1 |= (1U << 13);
 
+}
+
+// Function to write a character via UART
+static void uart_write(int character) {
+    // Wait until the TX data register is empty
+    // The TXE (Transmit Data Register Empty) flag is bit 7 of the USART status register (USART_SR)
+    // When TXE is set, it indicates that the data register is ready for new data
+    while (!(USART2->SR & (1U << 7))) {}
+
+    // Write the 8-bit character to the USART2 data register
+    // Masking with 0xFF ensures that only the lower 8 bits are written to the register
+    USART2->DR = (character & 0xFF);
+}
+
+// Redirected I/O function for character output
+// This function is often used by printf implementations for custom output
+static int __io_putchar(int character) {
+    // Write the character using the UART function
+    uart_write(character);
+    
+    // Return the character written as a standard return for putchar functions
+    return character;
 }
