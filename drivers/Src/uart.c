@@ -12,7 +12,7 @@
 #define APB1_CLOCK SYS_CLOCK
 #define UART_BAUDRATE 115200
 
-static int __io_putchar(int character);
+int __io_putchar(int character);
 static void uart_write(int character);
 
 
@@ -33,7 +33,7 @@ void uart_tx_init(void){
     GPIOA->AFR[0] |= (1U << 9);
     GPIOA->AFR[0] |= (1U << 10);
     // Set bit 11 to 0
-    GPIOA->AFR[0] &= !(1U << 11);
+    GPIOA->AFR[0] &= ~(1U << 11);
 
     // Enable clock for USART2 by setting the AHB1ENR register bit for USART2 (bit 17)
     RCC->APB1ENR |= (1U << 17);
@@ -63,7 +63,7 @@ static void uart_write(int character) {
 
 // Redirected I/O function for character output
 // This function is often used by printf implementations for custom output
-static int __io_putchar(int character) {
+int __io_putchar(int character) {
     // Write the character using the UART function
     uart_write(character);
     

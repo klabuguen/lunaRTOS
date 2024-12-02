@@ -2,8 +2,9 @@
  * @file uart.h
  * @brief UART interface for STM32F446xx.
  *
- * This header file provides the function declaration for UART
- * initialization in transmit mode.
+ * This header file provides function declarations for initializing
+ * the UART peripheral in transmit mode and implementing a custom
+ * `putchar` functionality.
  *
  * @date Nov 16, 2024
  * @author klabu
@@ -15,11 +16,23 @@
 #include "stm32f446xx.h"
 
 /**
- * @brief Initializes UART TX.
+ * @brief Transmits a single character via UART.
  *
- * Configures the UART peripheral for transmitting data.
- * This function sets up the baud rate and enables the UART
- * transmitter.
+ * This function is a low-level implementation for sending a character
+ * through the UART peripheral. It can be used by higher-level I/O functions.
+ *
+ * @param character The character to transmit.
+ * @return The transmitted character.
+ */
+int __io_putchar(int character);
+
+/**
+ * @brief Initializes the UART peripheral for transmit mode.
+ *
+ * Configures the UART peripheral on the STM32F446xx microcontroller
+ * for transmitting data. This setup involves enabling the UART clock,
+ * configuring the GPIO pins for UART functionality, and setting up
+ * basic UART parameters like baud rate.
  */
 void uart_tx_init(void);
 
