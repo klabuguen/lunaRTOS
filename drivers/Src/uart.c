@@ -39,7 +39,7 @@ void uart_tx_init(void){
     RCC->APB1ENR |= (1U << 17);
 
     // Configure baud rate
-    USART2->BRR = (uint16_t) (APB1_CLOCK + (UART_BAUDRATE / 2U) / UART_BAUDRATE);
+    USART2->BRR = (uint16_t) ((APB1_CLOCK + UART_BAUDRATE / 2U) / UART_BAUDRATE);
 
     // Configure transfer direction by setting the USART_CR1 transmit enable (TE) register bit to 1 (bit 3)
     USART2->CR1 = (1U << 3);
@@ -66,7 +66,7 @@ static void uart_write(int character) {
 int __io_putchar(int character) {
     // Write the character using the UART function
     uart_write(character);
-    
+
     // Return the character written as a standard return for putchar functions
     return character;
 }
