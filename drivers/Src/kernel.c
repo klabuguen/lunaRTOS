@@ -160,3 +160,28 @@ __attribute__((naked)) void SysTick_Handler(void) {
 	// Restore R0, R1, R2, R3, R12, LR, PC, PSR
 	__asm("BX	LR");
 }
+
+void SchedulerLaunch(void){
+	// Load currentPtr address into R0
+	__asm("LDR R0,=currStackPtr");
+	// Load R2 from address R0 (Set R2=currStackPtr)
+	__asm("LDR R2,[R0]");
+	// Load ARM Cortex-M SP from address R2
+	__asm("LDR SP,[R2]");
+	// Restore R4-R11
+	__asm("POP {R4-R11}");
+	// Restore R12
+	__asm("POP {R12}");
+	// Restore R0, R1, R2, R3
+	__asm("POP {R0-R3}");
+	// Skip LR
+	__asm("ADD SP,SP,#4");
+	// Pop LR to create new start location
+	__asm("POP {LR}");
+	// Skip PSR
+	__asm("ADD SP,SP,#4");
+	// Enable global interrupts
+	__asm("CPSIE	I");
+	// Return from exception
+	__asm("BX	LR");
+}
