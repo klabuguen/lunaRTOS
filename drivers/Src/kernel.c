@@ -24,12 +24,17 @@ tcb_t *currStackPtr;
 // Each thread is assigned its own stack space
 int32_t TCB_STACK[NUM_THREADS][MAX_STACK_SIZE];
 
+// Prescaler value for millisecond timing
+uint32_t MS_PRESCALER;
+
+static void KernelStackInit(uint8_t i);
+static void SchedulerLaunch(void);
 
 void KernelInit(void){
 	MS_PRESCALER = SYS_CLOCK / 1000;
 }
 
-void KernelLaunch(void){
+void KernelLaunch(uint32_t quanta){
 	// Reset SysTick timer
 	SysTick->CTRL = 0;
 
@@ -37,7 +42,7 @@ void KernelLaunch(void){
     SysTick->VAL = 0;
 
     // Configure SysTick Reload Value Register to equal the quanta value
-    SysTick->LOAD = (QUANTA * MS_PRESCALER) - 1;
+    SysTick->LOAD = (quanta * MS_PRESCALER) - 1;
 
     // Set SysTick to lowest priority
     // Necessary to prioritize hardware interrupts
@@ -52,7 +57,8 @@ void KernelLaunch(void){
     // Enable SysTick interrupt request
     SysTick->CTRL |= (1U << 1);
 
-    // TODO: Launch the Scheduler
+    // Launch the Scheduler
+    SchedulerLaunch();
 
 }
 
@@ -161,7 +167,7 @@ __attribute__((naked)) void SysTick_Handler(void) {
 	__asm("BX	LR");
 }
 
-void SchedulerLaunch(void){
+static void SchedulerLaunch(void){
 	// Load currentPtr address into R0
 	__asm("LDR R0,=currStackPtr");
 	// Load R2 from address R0 (Set R2=currStackPtr)
