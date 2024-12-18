@@ -43,4 +43,19 @@ void KernelLaunch(uint32_t quanta);
  */
 uint8_t KernelCreateThreads(void(*task0)(void), void(*task1)(void), void(*task2)(void));
 
+/**
+ * @brief Voluntarily yields the processor to allow other threads to execute.
+ *
+ * This function is used by the currently running thread to voluntarily
+ * yield its execution time, giving the scheduler an opportunity to
+ * select another thread to run. It is typically invoked when the
+ * current thread has completed its work and can wait until its
+ * next scheduling cycle.
+ *
+ * @note This function should only be called from threads managed
+ * by the kernel. Calling this function from an interrupt context
+ * or an uninitialized thread context may lead to undefined behavior.
+ */
+void ThreadYield(void);
+
 #endif // __KERNEL_H_

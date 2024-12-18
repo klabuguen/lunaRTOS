@@ -6,6 +6,8 @@
 #define NUM_THREADS         3  
 // Define the maximum stack size for each thread
 #define MAX_STACK_SIZE      400
+// Define interrupt control register
+#define INT_CTRL			(*((volatile uint32_t *)0xE000ED04))
 
 
 // Thread Control Block (TCB) structure definition
@@ -190,4 +192,14 @@ static void SchedulerLaunch(void){
 	__asm("CPSIE	I");
 	// Return from exception
 	__asm("BX	LR");
+}
+
+void ThreadYield(void){
+	// Clear SysTick Current Value Register
+	SysTick->VAL = 0;
+
+	// Trigger SysTick
+	// Set PENDSTSET to 1 (Ref DUI0553 p4-14)
+	INT_CTRL = (1 << 26);
+
 }
