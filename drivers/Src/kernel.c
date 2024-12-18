@@ -5,7 +5,7 @@
 // Define the number of threads in the system
 #define NUM_THREADS         3  
 // Define the maximum stack size for each thread
-#define MAX_STACK_SIZE      100
+#define MAX_STACK_SIZE      400
 
 
 // Thread Control Block (TCB) structure definition
@@ -24,12 +24,17 @@ tcb_t *currStackPtr;
 // Each thread is assigned its own stack space
 int32_t TCB_STACK[NUM_THREADS][MAX_STACK_SIZE];
 
+// Prescaler value for millisecond timing
+uint32_t MS_PRESCALER;
+
+static void KernelStackInit(uint8_t i);
+static void SchedulerLaunch(void);
 
 void KernelInit(void){
 	MS_PRESCALER = SYS_CLOCK / 1000;
 }
 
-void KernelLaunch(void){
+void KernelLaunch(uint32_t quanta){
 	// Reset SysTick timer
 	SysTick->CTRL = 0;
 
@@ -37,7 +42,7 @@ void KernelLaunch(void){
     SysTick->VAL = 0;
 
     // Configure SysTick Reload Value Register to equal the quanta value
-    SysTick->LOAD = (QUANTA * MS_PRESCALER) - 1;
+    SysTick->LOAD = (quanta * MS_PRESCALER) - 1;
 
     // Set SysTick to lowest priority
     // Necessary to prioritize hardware interrupts
@@ -52,7 +57,8 @@ void KernelLaunch(void){
     // Enable SysTick interrupt request
     SysTick->CTRL |= (1U << 1);
 
-    // TODO: Launch the Scheduler
+    // Launch the Scheduler
+    SchedulerLaunch();
 
 }
 
@@ -129,3 +135,59 @@ static void KernelStackInit(uint8_t i){
 	TCB_STACK[i][MAX_STACK_SIZE-16] = 0xAAAAAAAA;
 }
 
+__attribute__((naked)) void SysTick_Handler(void) {
+	// Disable global interrupts
+	__asm("CPSID	I");
+
+	// Suspend the current thread
+	// Save remaining general-purpose registers (R4, R5, R6, R7, R9, R10, R11)
+	__asm("PUSH {R4-R11}");
+	// Load address of currStackPtr into R0
+	__asm("LDR R0,=currStackPtr");
+	// Load R1 from address R0 (R1= currStackPtr)
+	__asm("LDR R1,[R0]");
+	// Store ARM Cortex-M SP from address R1
+	__asm("STR SP,[R1]");
+
+	// Choose the next thread
+	// Load ARM Cortex-M SP from address 4 bytes above R1
+	__asm("LDR R1,[R1,#4]");
+	// Store R1 in at address R0
+	__asm("STR R1,[R0]");
+	// Load ARM Cortex-M SP from address R1
+	__asm("LDR SP,[R1]");
+	// Restore R4-R11
+	__asm("POP {R4-R11}");
+
+	// Enable global interrupts
+	__asm("CPSIE	I");
+
+	// Return from exception
+	// Restore R0, R1, R2, R3, R12, LR, PC, PSR
+	__asm("BX	LR");
+}
+
+static void SchedulerLaunch(void){
+	// Load currentPtr address into R0
+	__asm("LDR R0,=currStackPtr");
+	// Load R2 from address R0 (Set R2=currStackPtr)
+	__asm("LDR R2,[R0]");
+	// Load ARM Cortex-M SP from address R2
+	__asm("LDR SP,[R2]");
+	// Restore R4-R11
+	__asm("POP {R4-R11}");
+	// Restore R12
+	__asm("POP {R12}");
+	// Restore R0, R1, R2, R3
+	__asm("POP {R0-R3}");
+	// Skip LR
+	__asm("ADD SP,SP,#4");
+	// Pop LR to create new start location
+	__asm("POP {LR}");
+	// Skip PSR
+	__asm("ADD SP,SP,#4");
+	// Enable global interrupts
+	__asm("CPSIE	I");
+	// Return from exception
+	__asm("BX	LR");
+}
