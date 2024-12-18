@@ -5,7 +5,7 @@
 // Define the number of threads in the system
 #define NUM_THREADS         3  
 // Define the maximum stack size for each thread
-#define MAX_STACK_SIZE      100
+#define MAX_STACK_SIZE      400
 
 
 // Thread Control Block (TCB) structure definition
