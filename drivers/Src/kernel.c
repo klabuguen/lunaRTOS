@@ -29,6 +29,9 @@ int32_t TCB_STACK[NUM_THREADS][MAX_STACK_SIZE];
 // Prescaler value for millisecond timing
 uint32_t MS_PRESCALER;
 
+// Period tick value
+uint32_t PERIOD_TICK;
+
 static void KernelStackInit(uint8_t i);
 static void SchedulerLaunch(void);
 
