@@ -212,6 +212,31 @@ void ThreadYield(void){
 }
 
 void SchedulerRoundRobin(void){
+	// If the number of ticks equals the configured period
+	if((++PERIOD_TICK) == PERIOD){
+		// Launch task
+		(*task3)();
+		// Set the number of ticks back to 0
+		PERIOD_TICK = 0;
+	}
+	// Switch to the next thread
+	currStackPtr = currStackPtr->nextStackPtr;
+}
 
+void TIM2_1Hz_Interrupt_Init(void){
+	// Enable TIM2 APB1 clock
+	RCC->APB1ENR |= (1 << 0);
+	// Set TIM2 pre-scaler
+	TIM2->PSC = 1600 - 1;
+	// Set TIM2 auto-reload value
+	TIM2->ARR = 1000 - 1;
+	// Clear TIM2 counter
+	TIM2->CNT = 0;
+	// Enable TIM2 counter in the TIM2 control register
+	TIM2->CR1 = (1 << 0);
+	// Enable TIM2 interrupt in DMA/interrupt enable register
+	TIM2->DIER |= (1 << 0);
+	// Enable TIM2 interrupt in NVIC
+	NVIC_EnableIRQ(TIM2_IRQn);
 
 }
