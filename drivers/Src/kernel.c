@@ -240,3 +240,16 @@ void TIM2_1Hz_Interrupt_Init(void){
 	NVIC_EnableIRQ(TIM2_IRQn);
 
 }
+
+void SemaphoreInit(int32_t *semaphore, int32_t value){
+
+}
+
+void SemaphoreWait(int32_t *semaphore){
+
+}
+
+void SemaphoreGive(int32_t *semaphore){
+
+}
+
