@@ -27,10 +27,10 @@ tcb_t *currStackPtr;
 int32_t TCB_STACK[NUM_THREADS][MAX_STACK_SIZE];
 
 // Prescaler value for millisecond timing
-uint32_t MS_PRESCALER;
+uint32_t MS_PRESCALER = 0;
 
 // Period tick value
-uint32_t PERIOD_TICK;
+uint32_t PERIOD_TICK = 0;
 
 static void KernelStackInit(uint8_t i);
 static void SchedulerLaunch(void);
@@ -149,17 +149,21 @@ __attribute__((naked)) void SysTick_Handler(void) {
 	__asm("PUSH {R4-R11}");
 	// Load address of currStackPtr into R0
 	__asm("LDR R0,=currStackPtr");
-	// Load R1 from address R0 (R1= currStackPtr)
+	// Load R1 with value at address R0 (R1= currStackPtr)
 	__asm("LDR R1,[R0]");
 	// Store ARM Cortex-M SP from address R1
 	__asm("STR SP,[R1]");
 
 	// Choose the next thread
-	// Load ARM Cortex-M SP from address 4 bytes above R1
-	__asm("LDR R1,[R1,#4]");
-	// Store R1 in at address R0
-	__asm("STR R1,[R0]");
-	// Load ARM Cortex-M SP from address R1
+	// Push R0 and LR to the stack
+	__asm("PUSH {R0,LR}");
+	// Save current instruction address + 4 and jump to SchedulerRoundRobin
+	__asm("BL SchedulerRoundRobin");
+	// Pop R0 and LR from the stack
+	__asm("POP {R0,LR}");
+	// Load R1 with value at address R0
+	__asm("LDR R1,[R0]");
+	// Load ARM Cortex-M SP with value address R1
 	__asm("LDR SP,[R1]");
 	// Restore R4-R11
 	__asm("POP {R4-R11}");
@@ -204,5 +208,10 @@ void ThreadYield(void){
 	// Trigger SysTick
 	// Set PENDSTSET to 1 (Ref DUI0553 p4-14)
 	INT_CTRL = (1 << 26);
+
+}
+
+void SchedulerRoundRobin(void){
+
 
 }
