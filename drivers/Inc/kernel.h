@@ -13,6 +13,8 @@
 #include <stdint.h>
 #include "stm32f446xx.h"
 
+#define PERIOD      100
+
 /**
  * @brief Initializes the LunaRTOS kernel.
  *
@@ -57,5 +59,24 @@ uint8_t KernelCreateThreads(void(*task0)(void), void(*task1)(void), void(*task2)
  * or an uninitialized thread context may lead to undefined behavior.
  */
 void ThreadYield(void);
+
+/**
+ * @brief A sample task for testing round-robin scheduling in the RTOS.
+ *
+ * This function represents the third task in the system and is primarily
+ * used to validate the round-robin scheduling functionality of the RTOS.
+ * It performs a simple operation, such as incrementing a variable in order
+ * to demonstrate task switching between multiple threads.
+ *
+ * @details The behavior of this task should be observable to confirm
+ * proper context switching and equal time allocation among tasks in
+ * a round-robin scheduling algorithm. This task will be defined in
+ * main.c
+ *
+ * @note Ensure that task3 is created and added to the scheduler's
+ * task list before testing. The task should be designed to complete
+ * within the time slice allocated by the RTOS.
+ */
+void task3(void);
 
 #endif // __KERNEL_H_
