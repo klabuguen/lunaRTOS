@@ -7,7 +7,10 @@
 
 typedef uint32_t TaskProfiler;
 
+
 TaskProfiler Task0_Profiler = 0, Task1_Profiler = 0,Task2_Profiler = 0;
+TaskProfiler pTask1_Profiler = 0, pTask2_Profiler = 0;
+int32_t semaphore1,semaphore2;
 
 void motor_run(void);
 void motor_stop(void);
@@ -21,8 +24,6 @@ void task0(void)
 	{
 		Task0_Profiler++;
 		ThreadYield();
-//		motor_run();
-
 	}
 }
 
@@ -31,9 +32,12 @@ void task1(void)
 {
 	while(1)
 	{
-		Task1_Profiler++;
-		ThreadYield();
+		SemaphoreWait(&semaphore1);
+		motor_run();
+//		Task1_Profiler++;
+//		ThreadYield();
 //		valve_open();
+		SemaphoreGive(&semaphore2);
 	}
 }
 
@@ -41,24 +45,28 @@ void task2(void)
 {
 	while(1)
 	{
-		Task2_Profiler++;
-		ThreadYield();
+		SemaphoreWait(&semaphore2);
+		valve_open();
+//		Task2_Profiler++;
+//		ThreadYield();
 //		motor_stop();
+		SemaphoreGive(&semaphore1);
 	}
 }
 
 void task3(void){
-	while(1){
-
-	}
+	pTask1_Profiler++;
 }
 
 int main(void)
 {
-
-
+	// Initialize UART
 	uart_tx_init();
-
+	// Initialize TIM2
+	TIM2_1Hz_Interrupt_Init();
+	// Initialize Semaphore1 & Semaphore2
+	SemaphoreInit(&semaphore1, 1);
+	SemaphoreInit(&semaphore2, 0);
 	/*Initialize Kernel*/
 	KernelInit();
 	/*Add Threads*/
@@ -68,6 +76,11 @@ int main(void)
 	KernelLaunch(QUANTA);
 
 
+}
+
+void TIM2_IRQHandler(void){
+	TIM2->SR &= ~(1 << 0);
+	pTask2_Profiler++;
 }
 
 
