@@ -80,6 +80,53 @@ void ThreadYield(void);
 void TIM2_1Hz_Interrupt_Init(void);
 
 /**
+ * @brief Initializes a semaphore with a given initial value.
+ *
+ * This function sets up a semaphore by assigning an initial value
+ * to it. The semaphore can be used for synchronization between
+ * tasks in a multitasking environment.
+ *
+ * @param semaphore Pointer to the semaphore variable to initialize.
+ * @param value Initial value to assign to the semaphore. Typically,
+ *              a binary semaphore is initialized to 0 or 1, while
+ *              counting semaphores can have higher values.
+ *
+ * @note Ensure the semaphore variable is properly allocated before
+ * calling this function. Incorrect initialization may lead to
+ * unpredictable behavior.
+ */
+void SemaphoreInit(int32_t *semaphore, int32_t value);
+
+/**
+ * @brief Decrements (waits on) a semaphore.
+ *
+ * This function blocks the calling task if the semaphore value is
+ * zero or less. If the semaphore value is positive, it decrements
+ * the semaphore and allows the task to proceed.
+ *
+ * @param semaphore Pointer to the semaphore variable to wait on.
+ *
+ * @note This function assumes atomic operations for manipulating
+ * the semaphore value to avoid race conditions. It should only be
+ * used in environments with proper mutual exclusion mechanisms.
+ */
+void SemaphoreWait(int32_t *semaphore);
+
+/**
+ * @brief Increments (gives) a semaphore.
+ *
+ * This function increments the value of a semaphore, potentially
+ * unblocking a task that is waiting on the semaphore. It is used
+ * to signal the availability of a resource or completion of a task.
+ *
+ * @param semaphore Pointer to the semaphore variable to increment.
+ *
+ * @note Ensure this function is called only after the semaphore
+ * has been initialized. Misuse may result in undefined behavior.
+ */
+void SemaphoreGive(int32_t *semaphore);
+
+/**
  * @brief A sample task for testing round-robin scheduling in the RTOS.
  *
  * This function represents the third task in the system and is primarily

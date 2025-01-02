@@ -242,14 +242,33 @@ void TIM2_1Hz_Interrupt_Init(void){
 }
 
 void SemaphoreInit(int32_t *semaphore, int32_t value){
+	// Initialize semaphore to a value
+	*semaphore = value;
+}
+
+void SemaphoreGive(int32_t *semaphore){
+	// Disable global interrupts
+	__disable_irq();
+	// Increment (give) semaphore
+	*semaphore += 1;
+	// Enable global interrupts
+	__enable_irq();
 
 }
 
 void SemaphoreWait(int32_t *semaphore){
-
-}
-
-void SemaphoreGive(int32_t *semaphore){
-
+	// Disable global interrupts
+	__disable_irq();
+	// Block until semaphore is available
+	while(*semaphore <= 0){
+		// Disable global interrupts
+		__disable_irq();
+		// Enable global interrupts
+		__enable_irq();
+	}
+	// Decrement semaphore
+	*semaphore -= 1;
+	// Enable global interrupts
+	__enable_irq();
 }
 
