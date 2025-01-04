@@ -140,7 +140,13 @@ static void KernelStackInit(uint8_t i){
 	TCB_STACK[i][MAX_STACK_SIZE-16] = 0xAAAAAAAA;
 }
 
-__attribute__((naked)) void SysTick_Handler(void) {
+void SysTick_Handler(void){
+	// Trigger PendSV
+	// Set PENDSVSET to 1 (Ref DUI0553 p4-14)
+	INT_CTRL = (1 << 28);
+}
+
+__attribute__((naked)) void PendSV_Handler(void) {
 	// Disable global interrupts
 	__asm("CPSID	I");
 
@@ -271,4 +277,3 @@ void SemaphoreWait(int32_t *semaphore){
 	// Enable global interrupts
 	__enable_irq();
 }
-
