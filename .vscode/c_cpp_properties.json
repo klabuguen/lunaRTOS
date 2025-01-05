@@ -1,0 +1,23 @@
+{
+  "configurations": [
+    {
+      "name": "windows-gcc-x64",
+      "includePath": [
+        "${workspaceFolder}/**"
+      ],
+      "defines": [
+        "STM32F446xx",
+        "USE_HAL_DRIVER",
+        "__CC_ARM"
+      ],
+      "compilerPath": "cmake/gcc-arm-none-eabi.cmake/",
+      "cStandard": "${default}",
+      "cppStandard": "${default}",
+      "intelliSenseMode": "windows-gcc-x64",
+      "compilerArgs": [
+        ""
+      ]
+    }
+  ],
+  "version": 4
+}
